@@ -7,13 +7,15 @@ using Newtonsoft.Json;
 using UnityEngine.Networking;
 using System.Threading.Tasks;
 using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
+using TMPro;
 public class SpeechRecognitionResponse
 {
     public string text;
 }
 public class SpeechRec : MonoBehaviour
 {
-    [SerializeField] private Text text;
+    [SerializeField] private TMP_Text text;
 
     private AudioClip clip;
     private byte[] bytes;
@@ -42,6 +44,7 @@ public class SpeechRec : MonoBehaviour
     public void StartRecording()
     {
         Debug.Log("Recording...");
+        text.text = "Recording...";
         clip = Microphone.Start(null, false, 10, 44100);
         recording = true;
     }
@@ -54,6 +57,7 @@ public class SpeechRec : MonoBehaviour
         clip.GetData(samples, 0);
         bytes = EncodeAsWAV(samples, clip.frequency, clip.channels);
         recording = false;
+        text.text = "Wait for Response";
         ConvertSpeechToText();
     }
 

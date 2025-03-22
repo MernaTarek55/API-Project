@@ -1,28 +1,46 @@
 using UnityEngine;
-using UnityEngine.AI;
+
 public class GirlRobotAI : MonoBehaviour
 {
     public float attackRange = 2f;
     public float moveSpeed = 3.5f;
-    public Animator animator; 
-    private Transform target; 
-    private NavMeshAgent agent;
-    
-    void Start()
+    public Animator animator;
+
+    private Transform target;
+    private string currentAction;
+
+    void Update()
     {
-        agent = GetComponent<NavMeshAgent>();
-        agent.speed = moveSpeed;
+        if (target != null)
+        {
+            float distance = Vector3.Distance(transform.position, target.position);
+
+            if (distance > attackRange)
+            {
+                MoveTowardsTarget();
+                animator.SetBool("walkFlag", true);
+            }
+            else
+            {
+                animator.SetBool("walkFlag", false);
+
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+                {
+                    animator.SetTrigger(currentAction);
+                    Debug.Log($"Robot performed {currentAction} on {target.name}!");
+                    target = null; // Reset after attacking
+                }
+            }
+            FaceTarget();
+        }
     }
 
     public void PerformAction(string action, string enemyName)
     {
         target = FindEnemy(enemyName);
+        currentAction = action;
 
-        if (target != null)
-        {
-            StartCoroutine(GoToEnemyAndAttack(action));
-        }
-        else
+        if (target == null)
         {
             Debug.LogWarning("Enemy not found: " + enemyName);
         }
@@ -30,30 +48,25 @@ public class GirlRobotAI : MonoBehaviour
 
     Transform FindEnemy(string enemyName)
     {
-        GameObject enemy = GameObject.FindGameObjectWithTag(enemyName);
+        GameObject enemy = GameObject.Find(enemyName); // Using name instead of tag
         return enemy ? enemy.transform : null;
     }
 
-    System.Collections.IEnumerator GoToEnemyAndAttack(string action)
+    void MoveTowardsTarget()
     {
-        while (Vector3.Distance(transform.position, target.position) >= attackRange)
+        if (target != null)
         {
-            agent.SetDestination(target.position);
-            animator.SetBool("walkFlag", true);
-
-            Debug.Log($"Moving towards {target.name} - Distance: {Vector3.Distance(transform.position, target.position)}");
-
-            yield return null;
+            transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
         }
-
-        agent.ResetPath();
-        animator.SetBool("walkFlag", false);
-
-        yield return new WaitForSeconds(0.5f);
-
-        animator.SetTrigger(action);
-
-        Debug.Log($"Robot performed {action} on {target.name}!");
     }
 
+    void FaceTarget()
+    {
+        if (target != null)
+        {
+            Vector3 direction = (target.position - transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 using LLMUnity;
 using System.Collections.Generic;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
  
 public class AttackEnemyByCommandExercise : MonoBehaviour
@@ -10,6 +11,7 @@ public class AttackEnemyByCommandExercise : MonoBehaviour
     [SerializeField] GameObject faceCamera;
     [SerializeField] GameCommandProcessor gameCommand;
     VSTextToSpeechControl TTS;
+    [SerializeField] private TMP_Text text;
     void Start()
     {
         TTS = FindAnyObjectByType<VSTextToSpeechControl>();
@@ -68,6 +70,7 @@ public class AttackEnemyByCommandExercise : MonoBehaviour
             }
             else
             {
+                TTS.SpeakMyText("No enemy mentioned in the command");
                 Debug.Log("No enemy mentioned in the command.");
             }
         }
@@ -80,6 +83,7 @@ public class AttackEnemyByCommandExercise : MonoBehaviour
             TTS.SpeakMyText(response);
             Debug.Log("AI Response: " + response);
         }
+        text.text = "Press E to Record ";
     }
 
 
