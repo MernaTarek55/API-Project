@@ -99,13 +99,13 @@ public class SpeechRec : MonoBehaviour
             var wwwForm = new WWWForm();
             wwwForm.AddBinaryData("image", bytes, "imagedata.raw");
             // Create and send the web request
-            using UnityWebRequest request = UnityWebRequest.Post(API_STT_URL, "", "text/html");
-            request.uploadHandler = new UploadHandlerRaw(bytes)
-            {
-                contentType = "text/html"
-            };
+            using UnityWebRequest request = UnityWebRequest.Post(API_STT_URL, "", "audio/wav");
+            request.uploadHandler = new UploadHandlerRaw(bytes);
+            //{
+            //    contentType = "text/html"
+            //};
 
-            request.SetRequestHeader("Authorization", "Bearer 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");
+            request.SetRequestHeader("Authorization", "Bearer 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");
             await request.SendWebRequest();
 
 
@@ -113,6 +113,7 @@ public class SpeechRec : MonoBehaviour
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Error: {request.error}");
+                Debug.Log($"Body: {request.downloadHandler.text}");
                 return;
             }
 
